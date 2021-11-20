@@ -2,6 +2,9 @@
 
 Algorig is a very compact cli tool which tries to ease your Algorand Stateful Smart Contracts development and tooling processes while still providing you all the flexibility. It simply utilizes PyTeal and Algorand Python SDK to ensure the smart contract development feels quite native and fluent.
 
+## Disclaimer
+This project is in very early stages and not ready for practical use yet.
+
 ## Setup / Installation
 Most cases you'd rather work in a virtual python environment.
 ```
@@ -24,7 +27,7 @@ $ rig init
 This command will create two things. The first one is the main configuration file which you will be able to configure your smart contract development environment.
 
 ```
-$ cat rig.rc
+$ cat .rig.rc
 [DEFAULT]
 algod_address = http://localhost:4001
 algod_token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -83,19 +86,29 @@ $ rig example_command myparam123
 Hello myparam123
 ```
 
-While this command does nothing rather than simply printing into console, these commands are generally supposed to contact with your implemented smart contract by mostly utilizing `ApplicationCall` transaction calls like below.
+While this command does nothing rather than simply printing into console, these commands are generally supposed to contact with your implemented smart contract by mostly utilizing `ApplicationCall` transaction calls. With this idea in mind, you may use such functionality to interact with your smart contract using cli commands easily.
 
 ```python
-def op_setup(self, app_id):
+def op_setup(self, example_arg):
     return self.submit([
         ApplicationCallTxn(
             sender=self.config['signing_address'],
             index=self.config['app_id'],
             on_complete=transaction.OnComplete.NoOpOC,
-            app_args=[b"setup"],
+            app_args=[b"setup", example_arg],
             sp=self.algod.suggested_params(),
         )
     ])
 ```
 
-More coming soon...
+This example will show us how easily you can send an application call transaction `setup` to your deployed contract by typing the command below:
+
+```
+$ rig setup "my example arg"
+Processing transaction: A35EASTS6ANOO5HTAFIWZAAPSWJJ653ZFM74APMHE46ZIKXDNQDQ
+........
+Confirmed at round: 2342525
+```
+
+---
+More documentation coming soon with further improvements.

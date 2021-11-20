@@ -5,7 +5,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_SECTION = 'DEFAULT'
-CONFIG_FILE_NAME = '.algorig.rc'
+CONFIG_FILE_NAME = '.rig.rc'
 
 
 DEFAULT_APP_MODULE = 'protocol'
