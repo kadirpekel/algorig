@@ -212,7 +212,7 @@ def get_approval_program(self):
     )
 ```
 
-Now you should be able to send your updates to your contract contract using the command below:
+Now you should be able to send your updates and override your existing contract using the command below:
 
 ```bash
 $ python application_update
@@ -226,8 +226,81 @@ Congratulations, you just developed and deployed your first smart contract to Al
 
 ### Interact with our Smart Contract
 
+So far we've already seen how Algorig smoothens our Algorand smart contract development with some smart tooling methods. We already created our first smart contract and updated it by using built-in commands. Now let's assume that wee need to interact with our contract. In our last update, our contract is expecting us to send it an application call transaction with a single parameters `"Hello World`. Now let's try to build such a command together to implement our contract operations.
+
+```python
+
+from algosdk.future.transaction import ApplicationCallTxn
+
+class Application(BaseApplication):
+
+  ...
+
+  def op_hello_world(self, my_param):
+    self.submit(ApplicationCallTxn(
+        sp=self.algod.suggested_params(),
+        on_complete=transaction.OnComplete.NoOpOC,
+        index=self.config.getint('app_id'),
+        sender=self.config['signing_address'],
+        app_args=[my_param],
+    ))
+
+```
+
+That's simple as it is. We just implemented a `hello_world` command to interact with our contract. Let's first locate it.
+
+```bash
+$ rig --help
+usage: rig [-h] [-v] {init,application_create,application_update,hello_world} ...
+
+positional arguments:
+  {init,application_create,application_update,hello_world}
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         show program's version number and exit
+
+```
+
+Also you may find out further details about the command itsel by seeing the help of the command itself.
+
+```bash
+$ rig hello_world --help
+usage: rig hello_world [-h] my_param
+
+positional arguments:
+  my_param
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Since the `hello_world` command ready at your fingertips, just run it to see if it works as expected.
+
+```bash
+$ rig hello_world "Hello World"
+Processing transaction: LBF5NQOM2WWIZ4ZUPAVTPKXTK7MD5TODPW2JO65UGNSASQ4IZT2Q
+........
+Confirmed at round: 6054
+```
+
+Perfect shot, you just interacted with your contract deployed on the blockchain. Let's now test what happens when we send an incorrect parameter to our contract.
+
+
+```bash
+$ rig hello_world "No Way"
+algosdk.error.AlgodHTTPError: TransactionPool.Remember: transaction 4GFYWBASWI7T5GERJKO5R4GUUXUDH4LQGCO55BVUKJNXNCQQAKJA: transaction rejected by ApprovalProgram
+```
+
+Very cool, your transaction simply rejected because you did not supply our expected parameter.
+
+### Dealing with group transaction to implement atomic operations
+
 TODO:
 
-
 ---
-More documentation coming soon with further improvements.
+
+## Todo:
+ * Utilize Python type hints to able to use typed parameters. Also code base would statically be more accurate and stable.
+ * Unit tests.
+ * More documentation.
