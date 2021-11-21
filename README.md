@@ -1,16 +1,16 @@
-# Algorig
-
-Algorig is a very compact cli tool which tries to ease your Algorand Stateful Smart Contracts development and tooling processes while still providing you all the flexibility. It simply utilizes PyTeal and Algorand Python SDK to ensure the smart contract development feels quite native and fluent.
-
 ## Disclaimer
 This project is in very early stages and not ready for practical use yet.
+
+# Algorig
+
+Algorig is a very compact and intuitive cli tool which tries to ease your Algorand smart contract development and tooling while still preserving all the flexibility. It simply utilizes PyTeal and Algorand Python SDK to make sure that your smart contract development feels quite native and fluent.
 
 ## Setup / Installation
 
 ### Setting up Algorand Sandbox
-Before we get started, we'll need an Algorand Node and KMD services up and running preferably in local environment to able interact with Algorand blockchain and manage our accounts. 
+Before we get started, we'll need an Algorand Node containing the Algod and KMD services up and running preferably in local environment to be able to interact with Algorand blockchain and manage our accounts.
 
-The shortest way to run an Algorand node and KMD indexing services for development purposes is installing a sandboxed Algorand node locally. To accomplish this, simply checkout and run the Algorand Sandbox repository by typing the commands below.
+The shortest way to run an Algorand node for development purposes is installing Algorand sandbox locally. To accomplish this, simply checkout the Algorand sandbox repository and run it by typing the commands below.
 
 ```bash
 $ git clone https://github.com/algorand/sandbox.git
@@ -18,9 +18,9 @@ $ cd sandbox
 $ ./sanbox up
 ```
 
-Once ready, you will have a full Algod and KMD services running locally under `Release` configuration which is a private network suitable for local development.
+Once the sandbox up and ready, you will have the both Algod and KMD services running locally under `Release` configuration which is a private network suitable for local development.
 
-Here, before starting our smart contract development, we'll need a contract owner account which will own the smart contract we develop on Algorand blockchain. Thanlfully Algorand Sandbox default configuration comes with a default preconfigured wallet named `unencrypted-default-wallet` containing a couple of accounts those already has a significant Algo balance which is very good enough to start with.
+Here, before getting started to our smart contract development, we'll need a Algorand account that will own the smart contract we develop on the Algorand blockchain. Thankfully, the Algorand sandbox default configuration comes with a default wallet named `unencrypted-default-wallet` also containing a couple of accounts those already has a significant $algo balance which is quite sufficient enough to start with.
 
 ```bash
 $ ./sandbox goal wallet list
@@ -30,7 +30,7 @@ ID: de87213c0d084688bb4e40fe2045e16a
 ##################################################
 ```
 
-You can also list your predefined account comes with
+You can also list all the accounts under the default wallet comes with your sandbox installation.
 
 ```bash
 $ ./sandbox goal account list -w unencrypted-default-wallet
@@ -39,11 +39,13 @@ $ ./sandbox goal account list -w unencrypted-default-wallet
 [offline] HPAMDTCS3B2BZUGP5JUNDNBKVWXYPKPC56VEYT3WYBEONPVD6HJLUHMTVQ  HPAMDTCS3B2BZUGP5JUNDNBKVWXYPKPC56VEYT3WYBEONPVD6HJLUHMTVQ  4000008000000000 microAlgos
 ```
 
-Now feel free to pick one of the accounts as the contract owner so that we can proceed to our Algorig setup. Please refer the Algorand Sandbox project page itself for more configuration options and any other details.
+Please refer the Algorand sandbox project page itself for more configuration options and any other details.
+
+Now feel free to pick one of the accounts listed above as a contract owner so that we can assign it while setting up our Algorig project.
 
 ### Get started with Algorig
 
-Since we're done with our local Algorand Node setup, now we're ready to develop an Algorand smart sontract using Algorig. Before we start, let's first configure a virtual environment located under a project directory which will be the home folder of our smart contract project.
+Since we're done with our local Algorand node setup, now we're ready to develop an Algorand smart sontract using Algorig. Before we start, let's first configure a virtual environment located under a project directory which will be the home folder of our smart contract project.
 
 ```bash
 $ mkdir mydefi
@@ -52,13 +54,13 @@ $ python -m venv venv
 $ source venv/bin/activate
 ```
 
- Once your virtual environment is up and ready, you may now install the Algorig itself. The best way to install Algorig is simply using pip command as shown below:
+Once your virtual environment is up and ready, you may now install the Algorig itself. The best way to install Algorig is simply using pip command as shown below:
 
 ```bash
 $ pip install algorig
 ```
 
-At this point, since you put your tool belt on, you're ready initialize a fresh new Algorig work bench by typing the command below.
+At this point, since you put your tool belt on, you're ready initialize a fresh new Algorig project by typing the command below.
 
 ```bash
 $ rig init --signing-address DNSNRCJ6WO4LCVNE6O6JHYSZQ7C725RVJMMTT4GCBOUH4VPMPMZYUVBFLU
@@ -84,9 +86,9 @@ num_local_byte_slices = 0
 num_local_ints = 0
 ```
 
-Here you might have noticed that how we used the contract owner account address by utilizing the `--signing-address` parameter. Likewise the use of such cli parameters will help us overriding above the default configuration values those mostly aleady supposed to conform the default settings of our Algorand Sandbox setup mentioned above.
+Here, you might have also noticed how we used the contract owner account address by utilizing the `--signing-address` parameter. Likewise, the use of such cli parameters will help us overriding the default configuration values above those mostly supposed to conform the default settings of our Algorand sandbox setup done before.
 
-Furthermore, `init` command also proposes a stub python module called `protocol.py` which contains the main entry point to your smart contract. It's simply a class declaration with a special name `Application` which also inherits and implements a base class `BaseApplication` comes with Algorig module itself.
+Furthermore, `init` command also proposes a stub python module called `protocol.py` which contains the main entry point to your smart contract development. It's simply a class declaration with a special name `Application` which also inherits and implements a base class `BaseApplication` comes with Algorig module itself.
 
 ```python
 $ cat protocol.py
@@ -105,11 +107,11 @@ class Application(BaseApplication):
         print('Hello ', example_param)
 ```
 
-You may notice that `Application` class simply proposes a method called `get_approval_program` of which you're expected to implement your main smart contract logic under this method.
+You may notice that `Application` class simply proposes a method called `get_approval_program()` the one you're expected to implement your main smart contract logic under it.
 
-Also you might have noticed the `op_example_command` method starting with a special prefix `op`. Algorig simply translates these special named class methods into cli commands which can be directly used to manage your smart contract operations those are supposed to communicate with on your smart contracts.
+Also you might have noticed the `op_example_command` method starting with a special prefix `op`. Algorig simply translates these special named class methods into cli commands which can be directly used to manage your smart contract operations those are supposed to interact with your smart contracts.
 
-To see the available commands, simple type `rig` or `rig --help`
+To see all the available commands, simple type `rig` or `rig --help`
 
 ```bash
 $ rig --help
@@ -130,13 +132,13 @@ $ rig example_command myparam123
 Hello myparam123
 ```
 
-While this command does nothing rather than simply printing into console, such commands are generally supposed to perform some operations with your implemented smart contract by presumably utilizing `ApplicationCall` or any other available application transactions calls which we'll see later on.
+While this command does nothing rather than simply printing into console, such commands are generally supposed to perform some operations with your deployed smart contract by presumably utilizing `ApplicationCall` or any other available transactions calls which we'll see later on.
 
 ### Write and deploy your first contract
 
-As mentioned previously, `get_approval_program()` method is the main entry point for your Algorand smart contract. You're here simply expected to return your PyTeal node object and Algorig will do the rest for you.
+As mentioned previously, `get_approval_program()` method is the main entry point to your Algorand smart contract. You're here simply expected to return a PyTeal node object and Algorig will handle the rest for you.
 
-Let's write a very simple contract which only accepts application create and update transactions respectively.
+Ok, let's write a very simple contract which only accepts application create and update transactions respectively.
 
 ```python
 
@@ -151,7 +153,7 @@ def get_approval_program(self):
 
 Congrats, you just implemented your first Algorand smart contract. At this point, since you'll need to deploy your contract to Algorand blockchain, Algorig here will help us to deploy it with a built-in command `application_create` by performing some magic behind in order to save us writing so many boilerplate code to achive the same.
 
-Let's find out how the command works at first.
+First of all, let's find out how the command works before acutally running it.
 
 ```bash
 $ rig application_create --help
@@ -162,7 +164,7 @@ optional arguments:
   --app_args APP_ARG
 ```
 
-It not seems to be fine and legit using the command directly without any parameteres in our case.
+It seems to be legit using the command directly without any given parameteres in our case.
 
 Let's run the command.
 
@@ -174,7 +176,7 @@ Confirmed at round: 2342525
 Application created with id: 1
 ```
 
-Success! This built-in command essentially compiled your teal code, created an `ApplicationCreate` transaction  automatically and sent it to Algorand blockchain throughout the Algod service by referring the `algod_address` and `algod_token` settings located in your config file. In our case, those settings have already the default values referring the sandbox Algod service we just started locally.
+Success! This built-in command essentially compiled your teal code, created an application create transaction automatically and sent it to Algorand blockchain throughout the Algod service by referring the `algod_address` and `algod_token` settings located under our config file. In our case, those settings have already the default values referring the sandbox Algod service we just started locally.
 
 ```bash
 # .rig.rc
@@ -184,7 +186,7 @@ algod_token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ...
 ```
 
-Another side effeect of this commmand is that whenever our application initially created on the blockchain this command will save and keep the id of the application just created in our config file using the key `app_id`. At this point if you dump the contents of our config file,  you'll see the `app_id` setting which was absent previously.
+Another side effect of this commmand is that whenever our application initially created on the blockchain, this command will save and keep the `id` of our application under our config file using the configuration key of `app_id`. At this point, if you dump the contents of our config file,  you'll notice the `app_id` setting which was absent previously.
 
 ```bash
 # .rig.rc
@@ -193,9 +195,11 @@ app_id = 1
 ...
 ```
 
-This setting will basically help Algorig to able to locate your application any time you want to interact with later on. For example there is another built-in command called `application_update` which uses this setting to locate the application. So now it's a good time to also see how to deploy any changes in the contract.
+This setting will basically help Algorig to locate your application whenever you want to interact with it. For example, there is also another built-in command called `application_update` which uses this setting while locating your application created previously.
 
-Let's change a bit of our contract, this time let our contract to accept an `ApplicationCall` transaction to perform some tasks on the contract. In this case, it will simply expect a sigle arg `"Hello World"` to approve the transaction.
+So now, it's a good time to also see how to deploy any changes in the contract.
+
+Ok, let's change a bit of our contract. This time let our contract to accept an `ApplicationCall` transaction to perform some tasks on the contract. In our case, it will simply expect a sigle arg `"Hello World"` to approve the transaction.
 
 ```python
 
@@ -222,32 +226,34 @@ Confirmed at round: 5493
 Application updated successfully.
 ```
 
-Congratulations, you just developed and deployed your first smart contract to Alogrand blockchain.
+Congratulations, you just developed, deployed and also updated your first smart contract to Alogrand blockchain.
 
 ### Interact with our Smart Contract
 
-So far we've already seen how Algorig smoothens our Algorand smart contract development with some smart tooling methods. We already created our first smart contract and updated it by using built-in commands. Now let's assume that wee need to interact with our contract. In our last update, our contract is expecting us to send it an application call transaction with a single parameters `"Hello World`. Now let's try to build such a command together to implement our contract operations.
+So far, we've already seen how Algorig smoothens our Algorand smart contract development with some smart tooling methods. We already created our first smart contract and updated it by using built-in commands. This time, let's now assume that we need to interact with our contractfor some purpose. By our last update, our contract is now expecting us to send it an application call transaction with a single parameters `"Hello World`.
+
+So let's try to build such a command together to see how to implement the contract operations.
 
 ```python
 
-from algosdk.future.transaction import ApplicationCallTxn
+from algosdk.future import transaction
 
 class Application(BaseApplication):
 
   ...
 
   def op_hello_world(self, my_param):
-    self.submit(ApplicationCallTxn(
+    self.submit(transaction.ApplicationCallTxn(
         sp=self.algod.suggested_params(),
         on_complete=transaction.OnComplete.NoOpOC,
         index=self.config.getint('app_id'),
         sender=self.config['signing_address'],
-        app_args=[my_param],
+        app_args=[bytes(my_param, 'ascii')],
     ))
 
 ```
 
-That's simple as it is. We just implemented a `hello_world` command to interact with our contract. Let's first locate it.
+That's simple as it. We just implemented a `hello_world` command to interact with our contract. Let's first locate it.
 
 ```bash
 $ rig --help
@@ -262,7 +268,7 @@ optional arguments:
 
 ```
 
-Also you may find out further details about the command itsel by seeing the help of the command itself.
+Also you may check the further details about our new command by seeing the helper instructions of the command itself.
 
 ```bash
 $ rig hello_world --help
@@ -284,7 +290,7 @@ Processing transaction: LBF5NQOM2WWIZ4ZUPAVTPKXTK7MD5TODPW2JO65UGNSASQ4IZT2Q
 Confirmed at round: 6054
 ```
 
-Perfect shot, you just interacted with your contract deployed on the blockchain. Let's now test what happens when we send an incorrect parameter to our contract.
+Perfect shot, you just interacted with your contract deployed on the blockchain. Now let's test what happens when we send an incorrect parameter to our contract.
 
 
 ```bash
@@ -292,7 +298,7 @@ $ rig hello_world "No Way"
 algosdk.error.AlgodHTTPError: TransactionPool.Remember: transaction 4GFYWBASWI7T5GERJKO5R4GUUXUDH4LQGCO55BVUKJNXNCQQAKJA: transaction rejected by ApprovalProgram
 ```
 
-Very cool, your transaction simply rejected because you did not supply our expected parameter.
+Very cool, our last transaction simply rejected because you did not supply the expected parameter.
 
 ### Dealing with group transaction to implement atomic operations
 
