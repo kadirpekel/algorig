@@ -134,21 +134,66 @@ While this command does nothing rather than simply printing into console, such c
 
 ### Write and deploy your first contract
 
+As mentioned previously, `get_approval_program` method is the main entry point for your Algorand smart contract. You're here expected to return your PyTeal node object. Let's write a simple contract which is supposed to accept only ApplicationCall transaction with and application arg of "Hello World".
+
 ```python
 
 def get_approval_program(self):
-    return Txn.application_args[0] == Bytes('Hello World')
+    return And(
+        Txn.application_args[0] == Bytes('Hello World'),
+        Txn.type == TxnType.ApplicationCall
+    )
 
 ```
 
-Congrats, you implemented your first Algorand smart contract using PyTeal. Here, as you might guess, Algorig will help us deploying the app to Algorand blockchain by performing some magic to prevent us writing so much boilerplate code. But before performing any deployment, we'll need a sender/creator account for the smart contract we just built. 
+Congrats, you implemented your first Algorand smart contract using PyTeal. At this point, while you'll need to deploy your contract to Algorand blockchain, Algorig here will help us deploying it with a built-in command `application_create` by performing some magic to prevent us writing so much boilerplate code.
+
+Let's find out how the command works at first.
+
+```bash
+$ rig application_create --help
+usage: rig application_create [-h] [--app_args APP_ARGS]
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --app_args APP_ARG
+```
+
+It's fine to use the command directly without any parameteres in our case. Let's run it.
 
 ```bash
 $ rig create_application
 Processing transaction: A35EASTS6ANOO5HTAFIWZAAPSWJJ653ZFM74APMHE46ZIKXDNQDQ
 ........
 Confirmed at round: 2342525
+Application created with id: 1
 ```
+
+This built-in command bascially compiles your teal code, creates an `ApplicationCreate` transaction  automatically and sends it to Algorand blockchain throughout the Algod service by referring the `algod_address` and `algod_token`settings located in your config file. In our case, those settings are already referring the sandbox Algod service we just started locally.
+
+```bash
+# .rig.rc
+...
+algod_address = http://localhost:4001
+algod_token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+...
+```
+Another side effeect of this commmand is that whenever our application initially created on the blockchain this command will save and keep the id of the application just created in our config file using the key `app_id`. At this point if you dump the contents of our config file, now you'll be able to locathe `app_id` setting which was absent previously.
+
+```bash
+# .rig.rc
+...
+app_id = 1
+...
+```
+
+This setting will help Algorig to locate your application every time you want to interact later on.
+
+Congratulations, you just developed and deployed your first smart contract to Alogrand blockchain.
+
+### Interact with our Smart Contract
+
+TODO:
 
 ---
 More documentation coming soon with further improvements.
