@@ -136,7 +136,7 @@ While this command does nothing rather than simply printing into console, such c
 
 As mentioned previously, `get_approval_program()` method is the main entry point for your Algorand smart contract. You're here simply expected to return your PyTeal node object and Algorig will do the rest for you.
 
-Let's write a very simple contract which only accepte Application create and update transactions.
+Let's write a very simple contract which only accepts application create and update transactions respectively.
 
 ```python
 
