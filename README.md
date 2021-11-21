@@ -136,19 +136,20 @@ While this command does nothing rather than simply printing into console, such c
 
 As mentioned previously, `get_approval_program()` method is the main entry point for your Algorand smart contract. You're here simply expected to return your PyTeal node object and Algorig will do the rest for you.
 
-Let's write a simple contract which is supposed to accept only and `ApplicationCall` transaction with a sigle arg `"Hello World"`.
+Let's write a very simple contract which only accepte Application create and update transactions.
 
 ```python
 
 def get_approval_program(self):
-    return And(
-        Txn.application_args[0] == Bytes('Hello World'),
-        Txn.type == TxnType.ApplicationCall
-    )
+    # Implement your contract here using pyteal
 
+    return Cond(
+        [Txn.application_id() == Int(0), Int(1)],
+        [Txn.on_completion() == OnComplete.UpdateApplication, Int(1)],
+    )
 ```
 
-Congrats, you just implemented your first Algorand smart contract. At this point, since you'll need to deploy your contract to Algorand blockchain, Algorig here will help us to deploy it with a built-in command `application_create` by performing some magic behind in order to save us writing so many boilerplate code ahead.
+Congrats, you just implemented your first Algorand smart contract. At this point, since you'll need to deploy your contract to Algorand blockchain, Algorig here will help us to deploy it with a built-in command `application_create` by performing some magic behind in order to save us writing so many boilerplate code to achive the same.
 
 Let's find out how the command works at first.
 
@@ -161,7 +162,7 @@ optional arguments:
   --app_args APP_ARG
 ```
 
-It not seems to be fine using the command directly without any parameteres in our case.
+It not seems to be fine and legit using the command directly without any parameteres in our case.
 
 Let's run the command.
 
@@ -173,7 +174,7 @@ Confirmed at round: 2342525
 Application created with id: 1
 ```
 
-Success! This built-in command essentially compiles your teal code, creates an `ApplicationCreate` transaction  automatically and sends it to Algorand blockchain throughout the Algod service by referring the `algod_address` and `algod_token`settings located in your config file. In our case, those settings have already the default values referring the sandbox Algod service we just started locally.
+Success! This built-in command essentially compiled your teal code, created an `ApplicationCreate` transaction  automatically and sent it to Algorand blockchain throughout the Algod service by referring the `algod_address` and `algod_token` settings located in your config file. In our case, those settings have already the default values referring the sandbox Algod service we just started locally.
 
 ```bash
 # .rig.rc
@@ -183,7 +184,7 @@ algod_token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ...
 ```
 
-Another side effeect of this commmand is that whenever our application initially created on the blockchain this command will save and keep the id of the application just created in our config file using the key `app_id`. At this point if you dump the contents of our config file,  you'll be now see the `app_id` setting which was absent previously.
+Another side effeect of this commmand is that whenever our application initially created on the blockchain this command will save and keep the id of the application just created in our config file using the key `app_id`. At this point if you dump the contents of our config file,  you'll see the `app_id` setting which was absent previously.
 
 ```bash
 # .rig.rc
@@ -192,13 +193,41 @@ app_id = 1
 ...
 ```
 
-This setting will basically help Algorig to able to locate your application every time you want to interact with anytime later.
+This setting will basically help Algorig to able to locate your application any time you want to interact with later on. For example there is another built-in command called `application_update` which uses this setting to locate the application. So now it's a good time to also see how to deploy any changes in the contract.
+
+Let's change a bit of our contract, this time let our contract to accept an `ApplicationCall` transaction to perform some tasks on the contract. In this case, it will simply expect a sigle arg `"Hello World"` to approve the transaction.
+
+```python
+
+def get_approval_program(self):
+    # Implement your contract here using pyteal
+
+    def on_call():
+        return Txn.application_args[0] == Bytes('Hello World')
+
+    return Cond(
+        [Txn.application_id() == Int(0), Int(1)],
+        [Txn.on_completion() == OnComplete.UpdateApplication, Int(1)],
+        [Txn.on_completion() == OnComplete.NoOp, on_call()],
+    )
+```
+
+Now you should be able to send your updates to your contract contract using the command below:
+
+```bash
+$ python application_update
+Processing transaction: H3ZBGVX4SVPAPHPZT23Q3LHIMTOQBEY2H6SDHGARCABLWRB7JNLA
+......
+Confirmed at round: 5493
+Application updated successfully.
+```
 
 Congratulations, you just developed and deployed your first smart contract to Alogrand blockchain.
 
 ### Interact with our Smart Contract
 
 TODO:
+
 
 ---
 More documentation coming soon with further improvements.

@@ -118,27 +118,41 @@ class BaseApplication:
         )
 
     def build_application_update_txn(self, app_args=None):
+
+        app_id = self.config.getint('app_id', None)
+        if not app_id:
+            raise AssertionError('Application not created yet')
+
         return ApplicationUpdateTxn(
             sp=self.algod.suggested_params(),
-            index=self.config.getint('app_id'),
+            index=app_id,
             sender=self.config['signing_address'],
             approval_program=self.get_approval_program_bytecode(),
             clear_program=self.get_clear_state_program_bytecode(),
             app_args=app_args or [],
         )
 
-    def op_application_create(self, app_args=None):
+    def op_application_create(self, app_args=None, force_creation=False):
+
+        if not force_creation:
+            app_id = self.config.getint('app_id', None)
+            if app_id:
+                raise AssertionError('Application already created, '
+                                     'please check your config.')
+
         txn = self.build_application_create_txn(app_args=app_args)
         response = self.submit(txn)
         app_id = str(response['application-index'])
         self.config['app_id'] = app_id
         save_config()
-        print(f'Application created with id: {app_id}')
+        print(f'Application created with id: {app_id}.')
         return response
 
     def op_application_update(self, app_args=None):
         txn = self.build_application_update_txn(app_args=app_args)
-        return self.submit(txn)
+        response = self.submit(txn)
+        print(f'Application updated successfully.')
+        return response
 
     def submit_group(self, transactions):
         assign_group_id(transactions)
