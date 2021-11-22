@@ -1,5 +1,14 @@
-## Disclaimer
-This project is in very early stages and not ready for practical use yet.
+```
+
+ _______  ___      _______  _______  ______    ___   _______ 
+|   _   ||   |    |       ||       ||    _ |  |   | |       |
+|  |_|  ||   |    |    ___||   _   ||   | ||  |   | |    ___|
+|       ||   |    |   | __ |  | |  ||   |_||_ |   | |   | __ 
+|       ||   |___ |   ||  ||  |_|  ||    __  ||   | |   ||  |
+|   _   ||       ||   |_| ||       ||   |  | ||   | |   |_| |
+|__| |__||_______||_______||_______||___|  |_||___| |_______|
+
+```
 
 # Welcome to Algorig - The Ultimate Algorand Smart Contract Development Rig!
 
@@ -302,11 +311,27 @@ Very cool, our last transaction simply rejected because you did not supply the d
 
 ### Dealing with group transaction to implement atomic operations
 
-TODO:
+Coming soon...
 
----
 
-## Todo:
+## Todos
+
  * Utilize Python type hints to able to use typed parameters on cli commands. Also code base would statically be more accurate and stable.
+ * Different config sections should be selectable while tooling.
  * Unit tests.
- * More documentation.
+ * More documentation and examples.
+
+
+## Disclaimer
+
+This project is in very early stages so please use it at your own risk.
+
+## License
+
+Copyright (c) 2021 Kadir Pekel.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
