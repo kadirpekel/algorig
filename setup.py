@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='algorig',
@@ -8,6 +8,7 @@ setup(
     description='algorand development rig',
     author='Kadir Pekel',
     author_email='kadirpekel@gmail.com',
+    packages=find_packages(include=['algorig']),
     url='https://github.com/kadirpekel/algorig',
     install_requires=[
         'py-algorand-sdk>=1.8.0',
