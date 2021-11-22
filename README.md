@@ -230,9 +230,9 @@ Congratulations, you just developed, deployed and also updated your first smart 
 
 ### Interact with our Smart Contract
 
-So far, we've already seen how Algorig smoothens our Algorand smart contract development with some smart tooling methods. We already created our first smart contract and updated it by using built-in commands. This time, let's now assume that we need to interact with our contractfor some purpose. By our last update, our contract is now expecting us to send it an application call transaction with a single parameters `"Hello World`.
+So far, we've already seen how Algorig smoothens our Algorand smart contract development with some smart tooling methods. We already created our first smart contract and updated it by using the built-in commands. This time, let's now assume that we need to interact with our contract with a purpose. By our last update, our contract now expects us to send an application call transaction with a single parameter with the value of `"Hello World`.
 
-So let's try to build such a command together to see how to implement the contract operations.
+So let's try to implement such a command together to see how to develop and perform the contract operations.
 
 ```python
 
@@ -290,7 +290,7 @@ Processing transaction: LBF5NQOM2WWIZ4ZUPAVTPKXTK7MD5TODPW2JO65UGNSASQ4IZT2Q
 Confirmed at round: 6054
 ```
 
-Perfect shot, you just interacted with your contract deployed on the blockchain. Now let's test what happens when we send an incorrect parameter to our contract.
+Perfect! You just interacted with your contract deployed on the blockchain. Now let's see what happens when we send a different parameter to our contract.
 
 
 ```bash
@@ -298,7 +298,7 @@ $ rig hello_world "No Way"
 algosdk.error.AlgodHTTPError: TransactionPool.Remember: transaction 4GFYWBASWI7T5GERJKO5R4GUUXUDH4LQGCO55BVUKJNXNCQQAKJA: transaction rejected by ApprovalProgram
 ```
 
-Very cool, our last transaction simply rejected because you did not supply the expected parameter.
+Very cool, our last transaction simply rejected because you did not supply the desired parameter.
 
 ### Dealing with group transaction to implement atomic operations
 
@@ -307,6 +307,6 @@ TODO:
 ---
 
 ## Todo:
- * Utilize Python type hints to able to use typed parameters. Also code base would statically be more accurate and stable.
+ * Utilize Python type hints to able to use typed parameters on cli commands. Also code base would statically be more accurate and stable.
  * Unit tests.
  * More documentation.
