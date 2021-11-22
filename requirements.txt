@@ -1,4 +1,0 @@
-py-algorand-sdk
-pyteal
-komandr
-flake8

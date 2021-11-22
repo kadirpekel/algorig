@@ -33,8 +33,8 @@ class Application(BaseApplication):
         # Implement your contract here using pyteal
         return Int(0)
 
-    def op_example_command(self, example_param):
-        # This is an example contract call op which can be used as cli command
+    def op_example_command(self, example_param: int):
+        # This is an example method which can be used as cli command
         print(example_param)
 
 '''
