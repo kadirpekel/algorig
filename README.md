@@ -1,7 +1,7 @@
 ## Disclaimer
 This project is in very early stages and not ready for practical use yet.
 
-# Algorig
+# Welcome to Algorig - The Ultimate Algorand Smart Contract Development Rig!
 
 Algorig is a very compact and intuitive cli tool which tries to ease your Algorand smart contract development and tooling while still preserving all the flexibility. It simply utilizes PyTeal and Algorand Python SDK to make sure that your smart contract development feels quite native and fluent.
 
