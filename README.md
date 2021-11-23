@@ -313,15 +313,6 @@ Very cool, our last transaction simply rejected because you did not supply the d
 
 Coming soon...
 
-
-## Todos
-
- * Utilize Python type hints to able to use typed parameters on cli commands. Also code base would statically be more accurate and stable.
- * Different config sections should be selectable while tooling.
- * Unit tests.
- * More documentation and examples.
-
-
 ## Disclaimer
 
 This project is in very early stages so please use it at your own risk.

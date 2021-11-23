@@ -17,9 +17,8 @@ def setup():
         return
 
     Application = getattr(protocol, 'Application', None)
+    assert Application, '`Application` class not found'
 
-    if not Application:
-        raise ValueError('`Application` class not implemented')
 
     app = Application()
     for attr_name in dir(app):

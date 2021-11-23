@@ -1,3 +1,4 @@
+import os
 import logging
 import configparser
 
@@ -89,6 +90,8 @@ def init_config(algod_address=None,
 
 
 def load_config():
+    assert os.path.exists(CONFIG_FILE_NAME), f'{CONFIG_FILE_NAME} not found'
+
     global config
 
     if not config:
