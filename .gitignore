@@ -30,5 +30,5 @@ pip-log.txt
 
 *.teal
 
-.rig.rc
+protocol.json
 protocol.py
