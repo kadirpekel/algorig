@@ -1,6 +1,8 @@
-import logging
-import base64
+import sys
 import time
+import base64
+import logging
+import importlib
 
 from pyteal import compileTeal, Mode, Int
 
@@ -13,19 +15,60 @@ from algosdk.future.transaction import (ApplicationCreateTxn,
                                         StateSchema)
 
 
-from algorig.config import get_config_section, save_config
+from algorig.config import load_config, save_config
 
 
 logger = logging.getLogger(__name__)
+
+APP_MODULE_NAME = 'protocol'
+APP_FILE_NAME = f'{APP_MODULE_NAME}.py'
+APP_TEMPLATE = '''from pyteal import *
+
+from algorig.application import BaseApplication
+
+
+class Application(BaseApplication):
+
+    def get_approval_program(self):
+        # Implement your contract here using pyteal
+        return Int(1)
+
+    def op_example_command(self, example_param: int):
+        # This is an example method which can be used as cli command
+        print(example_param)
+'''
+
+
+def init_application_stub():
+    with open(APP_FILE_NAME, 'w') as f:
+        f.write(APP_TEMPLATE)
 
 
 class BaseApplication:
 
     DEFAULT_WAIT_TIMEOUT = 10
 
-    def __init__(self, section=None):
-        self.section = section
-        self.config = get_config_section(section)
+    @classmethod
+    def load_from_cwd(cls):
+        sys.path.append('.')
+        protocol = importlib.import_module(APP_MODULE_NAME)
+        Application = getattr(protocol, 'Application', None)
+        assert Application, '`Application` class not found'
+        assert issubclass(Application, BaseApplication),\
+            '`Application` should be a subclass of `BaseApplication`'
+
+        return Application()
+
+    def generate_commands(self):
+        from komandr import command
+
+        for attr_name in dir(self):
+            attr = getattr(self, attr_name)
+            if attr_name.startswith('op_') and callable(attr):
+                command(name=attr_name[3:])(attr)
+
+    def __init__(self):
+        self.config = load_config()
         self.kmd = self.build_kmd()
         self.algod = self.build_algod()
 
@@ -50,7 +93,7 @@ class BaseApplication:
     def compile_program(self, program):
         return compileTeal(program,
                            mode=Mode.Application,
-                           version=self.config.getint('teal_version'))
+                           version=self.config['teal_version'])
 
     def compile_teal(self, teal):
         meta = self.algod.compile(teal)
@@ -97,13 +140,13 @@ class BaseApplication:
 
     def get_global_schema(self):
         return StateSchema(
-            num_uints=self.config.getint('num_global_ints'),
-            num_byte_slices=self.config.getint('num_global_byte_slices'))
+            num_uints=self.config['num_global_ints'],
+            num_byte_slices=self.config['num_global_byte_slices'])
 
     def get_local_schema(self):
         return StateSchema(
-            num_uints=self.config.getint('num_local_ints'),
-            num_byte_slices=self.config.getint('num_local_byte_slices'))
+            num_uints=self.config['num_local_ints'],
+            num_byte_slices=self.config['num_local_byte_slices'])
 
     def build_application_create_txn(self, app_args=None):
         return ApplicationCreateTxn(
@@ -119,7 +162,7 @@ class BaseApplication:
 
     def build_application_update_txn(self, app_args=None):
 
-        app_id = self.config.getint('app_id', None)
+        app_id = self.config.get('app_id', None)
         if not app_id:
             raise AssertionError('Application not created yet')
 
@@ -135,23 +178,23 @@ class BaseApplication:
     def op_application_create(self, app_args=None, force_creation=False):
 
         if not force_creation:
-            app_id = self.config.getint('app_id', None)
+            app_id = self.config.get('app_id', None)
             if app_id:
                 raise AssertionError('Application already created, '
                                      'please check your config.')
 
         txn = self.build_application_create_txn(app_args=app_args)
         response = self.submit(txn)
-        app_id = str(response['application-index'])
+        app_id = response['application-index']
         self.config['app_id'] = app_id
-        save_config()
+        save_config(self.config)
         print(f'Application created with id: {app_id}.')
         return response
 
     def op_application_update(self, app_args=None):
         txn = self.build_application_update_txn(app_args=app_args)
         response = self.submit(txn)
-        print(f'Application updated successfully.')
+        print('Application updated successfully.')
         return response
 
     def submit_group(self, transactions):

@@ -77,22 +77,23 @@ $ rig init --signing-address DNSNRCJ6WO4LCVNE6O6JHYSZQ7C725RVJMMTT4GCBOUH4VPMPMZ
 
 This command will create two things. The first one is the main configuration file which you will be able to configure your smart contract development environment.
 
-```bash
-$ cat .rig.rc
-[DEFAULT]
-algod_address = http://localhost:4001
-algod_token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-kmd_address = http://localhost:4002
-kmd_token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-wallet_name = unencrypted-default-wallet
-wallet_password =
-signing_address = DNSNRCJ6WO4LCVNE6O6JHYSZQ7C725RVJMMTT4GCBOUH4VPMPMZYUVBFLU
-app_module = protocol
-teal_version = 4
-num_global_byte_slices = 0
-num_global_ints = 0
-num_local_byte_slices = 0
-num_local_ints = 0
+```json
+$ cat protocol.json
+{
+  "algod_address": "http://localhost:4001",
+  "algod_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "kmd_address": "http://localhost:4002",
+  "kmd_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "wallet_name": "unencrypted-default-wallet",
+  "wallet_password": "",
+  "signing_address": "DNSNRCJ6WO4LCVNE6O6JHYSZQ7C725RVJMMTT4GCBOUH4VPMPMZYUVBFLU",
+  "teal_version": 4,
+  "num_global_byte_slices": 0,
+  "num_global_ints": 0,
+  "num_local_byte_slices": 0,
+  "num_local_ints": 0,
+  "app_id": 0
+}
 ```
 
 Here, you might have also noticed how we used the contract owner account address by utilizing the `--signing-address` parameter. Likewise, the use of such cli parameters will help us overriding the default configuration values above those mostly supposed to conform the default settings of our Algorand sandbox setup done before.
@@ -187,21 +188,25 @@ Application created with id: 1
 
 Success! This built-in command essentially compiled your teal code, created an application create transaction automatically and sent it to Algorand blockchain throughout the Algod service by referring the `algod_address` and `algod_token` settings located under our config file. In our case, those settings have already the default values referring the sandbox Algod service we just started locally.
 
-```bash
-# .rig.rc
-...
-algod_address = http://localhost:4001
-algod_token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-...
+```json
+# protocol.json
+{
+  ...
+  "algod_address": "http://localhost:4001",
+  "algod_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  ...
+}
 ```
 
 Another side effect of this commmand is that whenever our application initially created on the blockchain, this command will save and keep the `id` of our application under our config file using the configuration key of `app_id`. At this point, if you dump the contents of our config file,  you'll notice the `app_id` setting which was absent previously.
 
-```bash
-# .rig.rc
-...
-app_id = 1
-...
+```json
+# protocol.json
+{
+  ...
+  "app_id": 1
+  ...
+}
 ```
 
 This setting will basically help Algorig to locate your application whenever you want to interact with it. For example, there is also another built-in command called `application_update` which uses this setting while locating your application created previously.

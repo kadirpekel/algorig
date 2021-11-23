@@ -1,37 +1,60 @@
 import pytest
+
 from unittest import mock
 
-from algorig.config import load_config, CONFIG_FILE_NAME
+from algorig import config
 
 
 @pytest.fixture
 def config_data():
-    return '''[FIRST_SECTION]
-first_key = first_value
-second_key = second_value
-[SECOND_SECTION]
-third_key = third_value
+    return '''{
+    "foo": "bar",
+    "x": 1,
+    "y": 2
+}
 '''
+
+
+def test_init_config(config_data):
+    c = {
+        'a': 'foo',
+        'b': 2,
+        'c': None,
+    }
+    with mock.patch('algorig.config.DEFAULT_CONFIG', c):
+        with mock.patch('algorig.config.save_config') as save_config:
+            config.init_config(a=None, b=3, c='bar', d='baz')
+            save_config.assert_called_once_with({
+                'a': 'foo',
+                'b': 3,
+                'c': 'bar',
+                'd': 'baz'
+            })
 
 
 def test_load_config(config_data):
 
-    with mock.patch('os.path.exists', lambda x: False) as path_exists:
+    with mock.patch('os.path.exists', lambda x: False):
         with pytest.raises(AssertionError):
-            config = load_config()
+            c = config.load_config()
 
     with mock.patch('os.path.exists', lambda x: True):
         with mock.patch('builtins.open',
-                    mock.mock_open(read_data=config_data)) as mock_open:
-            config = load_config()
-            config = load_config() # check if global variable caching works
-            mock_open.assert_called_once_with(CONFIG_FILE_NAME)
+                        mock.mock_open(read_data=config_data)) as mock_open:
+            c = config.load_config()
+            c = config.load_config()  # check if global variable caching works
+            mock_open.assert_called_once_with(config.CONFIG_FILE_NAME)
 
-            config = load_config()
-            sections = config.sections()
-            assert sections == ['FIRST_SECTION', 'SECOND_SECTION']
-            first_section = config['FIRST_SECTION']
-            assert first_section['first_key'] == 'first_value'
-            assert first_section['second_key'] == 'second_value'
-            second_section = config['SECOND_SECTION']
-            assert second_section['third_key'] == 'third_value'
+            c = config.load_config()
+            assert c['foo'] == 'bar'
+            assert c['x'] == 1
+            assert c['y'] == 2
+
+
+def test_save_config(config_data):
+
+    c = config.load_config()
+    with mock.patch('builtins.open',
+                    mock.mock_open(read_data=config_data)) as mock_open:
+        config.save_config(c)
+        mock_open.assert_called_once_with(config.CONFIG_FILE_NAME, 'w')
