@@ -1,7 +1,7 @@
 from komandr import command, main  # noqa
 
 from algorig.config import init_config
-from algorig.application import init_application_stub, BaseApplication
+from algorig.app import init_application_stub, BaseApplication
 
 
 @command
@@ -37,7 +37,7 @@ def init(algod_address=None,
 
 
 try:
-    app = BaseApplication.load_from_cwd()
-    app.generate_commands()
+    application = BaseApplication.load_from_cwd()
+    application.generate_commands()
 except ImportError:
     pass

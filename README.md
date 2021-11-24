@@ -101,20 +101,22 @@ Here, you might have also noticed how we used the contract owner account address
 Furthermore, `init` command also proposes a stub python module called `protocol.py` which contains the main entry point to your smart contract development. It's simply a class declaration with a special name `Application` which also inherits and implements a base class `BaseApplication` comes with Algorig module itself.
 
 ```python
-$ cat protocol.py
+# protocol.py
+
 from pyteal import *
 
-from algorig.application import BaseApplication
+from algorig.app import BaseApplication
+
 
 class Application(BaseApplication):
 
     def get_approval_program(self):
         # Implement your contract here using pyteal
-        return Int(0)
+        return Int(1)
 
-    def op_example_command(self, example_param):
-        # This is an example contract call op which can be used as cli command
-        print('Hello ', example_param)
+    def op_example_command(self, my_str: str, my_int: int = 42):
+        # This is an example method which can be used as cli command
+        print(f'my_str: {my_str}, my_int: {my_int}')
 ```
 
 You may notice that `Application` class simply proposes a method called `get_approval_program()` the one you're expected to implement your main smart contract logic under it.
@@ -151,6 +153,7 @@ As mentioned previously, `get_approval_program()` method is the main entry point
 Ok, let's write a very simple contract which only accepts application create and update transactions respectively.
 
 ```python
+# protocol.py
 
 def get_approval_program(self):
     # Implement your contract here using pyteal
@@ -216,6 +219,7 @@ So now, it's a good time to also see how to deploy any changes in the contract.
 Ok, let's change a bit of our contract. This time let our contract to accept an `ApplicationCall` transaction to perform some tasks on the contract. In our case, it will simply expect a sigle arg `"Hello World"` to approve the transaction.
 
 ```python
+# protocol.py
 
 def get_approval_program(self):
     # Implement your contract here using pyteal
@@ -249,8 +253,12 @@ So far, we've already seen how Algorig smoothens our Algorand smart contract dev
 So let's try to implement such a command together to see how to develop and perform the contract operations.
 
 ```python
+# protocol.py
+
+from algorig.app import BaseApplication
 
 from algosdk.future import transaction
+
 
 class Application(BaseApplication):
 
@@ -264,7 +272,6 @@ class Application(BaseApplication):
         sender=self.config['signing_address'],
         app_args=[bytes(my_param, 'ascii')],
     ))
-
 ```
 
 That's simple as it. We just implemented a `hello_world` command to interact with our contract. Let's first locate it.

@@ -24,7 +24,7 @@ APP_MODULE_NAME = 'protocol'
 APP_FILE_NAME = f'{APP_MODULE_NAME}.py'
 APP_TEMPLATE = '''from pyteal import *
 
-from algorig.application import BaseApplication
+from algorig.app import BaseApplication
 
 
 class Application(BaseApplication):
@@ -33,9 +33,9 @@ class Application(BaseApplication):
         # Implement your contract here using pyteal
         return Int(1)
 
-    def op_example_command(self, example_param: int):
+    def op_example_command(self, my_str: str, my_int: int = 42):
         # This is an example method which can be used as cli command
-        print(example_param)
+        print(f'my_str: {my_str}, my_int: {my_int}')
 '''
 
 
