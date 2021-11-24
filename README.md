@@ -323,13 +323,66 @@ Very cool, our last transaction simply rejected because you did not supply the d
 
 ### Dealing with group transaction to implement atomic operations
 
-[TODO]
+Most transactions need to be grouped in some way and ensured all they are executed successfully which we call atomic operations.
+In Algorig grouping more than one transactions is done by `BaseApplication.submit_transactions()` method. Let's see how it works:
+
+We'll take the popular Algorand Auction Demo's `setupAuctionApp` operation with some brevity:
+
+```python
+# protocol.py
+
+from algorig.app import BaseApplication
+
+from algosdk.future import transaction
+
+
+class Application(BaseApplication):
+
+  ...
+
+  def op_auction_setup(self, nft_holder_address, nft_id: int,
+                       nft_amount: int = 1):
+    sp = self.algod.suggested_params()
+
+    fund_app_txn = transaction.PaymentTxn(
+        sp=sp,
+        sender=nft_holder_address,
+        receiver=self.config['app_address'],
+        amt=1_000
+    )
+
+    setup_app_txn = transaction.ApplicationCallTxn(
+        sp=sp,
+        on_complete=transaction.OnComplete.NoOpOC,
+        sender=self.config['signing_address'],
+        index=self.config['app_id'],
+        app_args=['setup'],
+    )
+
+    transfer_nft_txn = transaction.AssetTransferTxn(
+        sp=sp,
+        sender=nft_holder_address,
+        receiver=self.config['app_address'],
+        index=nft_id,
+        amt=nft_amount,
+    )
+
+    self.submit_group([
+        fund_app_txn,
+        setup_app_txn,
+        transfer_nft_txn
+    ])
+```
 
 ### Custom configuration settings
 
 [TODO]
 
 ### Algorig as a SDK builder
+
+[TODO]
+
+### Overriding `BaseApplication`
 
 [TODO]
 

@@ -8,6 +8,7 @@ from pyteal import compileTeal, Mode, Int
 
 from algosdk.v2client import algod
 from algosdk import kmd
+from algosdk.logic import get_application_address
 from algosdk.future.transaction import assign_group_id
 from algosdk.future.transaction import (ApplicationCreateTxn,
                                         ApplicationUpdateTxn,
@@ -110,11 +111,13 @@ class BaseApplication:
         raise ValueError(f'Wallet `{wallet_name}` not found on KMD')
 
     def sign_transaction(self, txn):
+        wallet_password = self.config['wallet_password']
         wallet_token = self.get_wallet_token()
-        wallet_handle = self.kmd.init_wallet_handle(
-            wallet_token, self.config['wallet_password'])
-        signed_txn = self.kmd.sign_transaction(
-            wallet_handle, self.config['wallet_password'], txn)
+        wallet_handle = self.kmd.init_wallet_handle(wallet_token,
+                                                    wallet_password)
+        signed_txn = self.kmd.sign_transaction(wallet_handle,
+                                               wallet_password,
+                                               txn)
         self.kmd.release_wallet_handle(wallet_handle)
         return signed_txn
 
@@ -161,37 +164,32 @@ class BaseApplication:
         )
 
     def build_application_update_txn(self, app_args=None):
-
-        app_id = self.config.get('app_id', None)
-        if not app_id:
-            raise AssertionError('Application not created yet')
-
         return ApplicationUpdateTxn(
             sp=self.algod.suggested_params(),
-            index=app_id,
+            index=self.config['app_id'],
             sender=self.config['signing_address'],
             approval_program=self.get_approval_program_bytecode(),
             clear_program=self.get_clear_state_program_bytecode(),
             app_args=app_args or [],
         )
 
-    def op_application_create(self, app_args=None, force_creation=False):
-
-        if not force_creation:
-            app_id = self.config.get('app_id', None)
-            if app_id:
-                raise AssertionError('Application already created, '
-                                     'please check your config.')
+    def op_application_create(self, app_args: list = []):
+        app_id = self.config.get('app_id', None)
+        assert not app_id, 'Application already created.'
 
         txn = self.build_application_create_txn(app_args=app_args)
         response = self.submit(txn)
         app_id = response['application-index']
-        self.config['app_id'] = app_id
+        app_address = get_application_address(app_id)
+        self.config.update({
+            'app_id': app_id,
+            'app_address': app_address
+        })
         save_config(self.config)
         print(f'Application created with id: {app_id}.')
         return response
 
-    def op_application_update(self, app_args=None):
+    def op_application_update(self, app_args: list = []):
         txn = self.build_application_update_txn(app_args=app_args)
         response = self.submit(txn)
         print('Application updated successfully.')
@@ -201,17 +199,14 @@ class BaseApplication:
         assign_group_id(transactions)
         signed_transactions = []
         for txn in transactions:
-            if txn.sender == self.config['signing_address']:
-                signed_txn = self.sign_transaction(txn)
-                signed_transactions.append(signed_txn)
+            signed_txn = self.sign_transaction(txn)
+            signed_transactions.append(signed_txn)
 
         tx_id = self.algod.send_transactions(signed_transactions)
         return self.wait_for_transaction(tx_id)
 
     def submit(self, txn):
-        if txn.sender == self.config['signing_address']:
-            signed_txn = self.sign_transaction(txn)
-
+        signed_txn = self.sign_transaction(txn)
         tx_id = self.algod.send_transaction(signed_txn)
         return self.wait_for_transaction(tx_id)
 

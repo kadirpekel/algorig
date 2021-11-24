@@ -1,7 +1,7 @@
 from pyteal import *
 
 from algosdk.future import transaction
-from algorig.application import BaseApplication
+from algorig.app import BaseApplication
 
 
 class Application(BaseApplication):
@@ -20,7 +20,7 @@ class Application(BaseApplication):
         self.submit(transaction.ApplicationCallTxn(
             sp=self.algod.suggested_params(),
             on_complete=transaction.OnComplete.NoOpOC,
-            index=self.config.getint('app_id'),
+            index=self.config['app_id'],
             sender=self.config['signing_address'],
-            app_args=[my_param)],
+            app_args=[my_param],
         ))
