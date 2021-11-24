@@ -23,8 +23,14 @@ setup(
         'komandr>=2.0.1',
         'gdparser>=0.0.2'
     ],
+    extras_require={
+        'dev': [
+            'pytest',
+            'flake8'    
+        ]
+    },
     tests_require=[
-        'pytest>=1.8.2'
+        'pytest'
     ],
     entry_points={
         'console_scripts': [

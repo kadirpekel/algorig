@@ -323,7 +323,55 @@ Very cool, our last transaction simply rejected because you did not supply the d
 
 ### Dealing with group transaction to implement atomic operations
 
-Coming soon...
+[TODO]
+
+### Custom configuration settings
+
+[TODO]
+
+### Algorig as a SDK builder
+
+[TODO]
+
+## Contribute
+
+Any contributions are always very welcome, just before sending any pull requests, please make sure:
+
+ * You have setup your development environment correctly
+ * You have added/modifed the corresponding unit tests regarding your contribution
+ * You have checked your code agains `flake8` style rules
+
+Please don't hesitate to contirubute if you like and use Algorig.
+
+### Development Environment
+
+To start contributing, simply checkout the repository, create a virtual env and install the project locally.
+
+```bash
+$ git checkout https://github.com/kadirpekel/algorig
+$ cd algorig
+$ python -m venv venv
+$ source venv/bin/activate
+$ pip install -e ".[dev]"
+```
+
+Now you're ready to rock!
+
+### Unit Tests
+
+Algorig utilizes `pytest` as test runner, just type below the command to run all the unit tests
+
+```bash
+$ pytest
+```
+
+### Coding Style
+
+Algorig code base follows the default `flake8` style guiding rules. So before sending any pull requests, please also make sure that your code passes the `flake8` checks.
+
+```bash
+$ flake8 algorig
+```
 
 ## Disclaimer
 
