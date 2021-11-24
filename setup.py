@@ -1,9 +1,16 @@
 from setuptools import setup, find_packages
 
+# read the contents of your README file
+from pathlib import Path
+cwd = Path(__file__).parent
+long_description = (cwd / 'README.md').read_text()
+
 setup(
     name='algorig',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     py_modules=['algorig'],
-    version='0.0.4',
+    version='0.0.5',
     python_requires='>3.5.4',
     description='algorand development rig',
     author='Kadir Pekel',
