@@ -52,9 +52,8 @@ def test_load_config(config_data):
 
 
 def test_save_config(config_data):
-
-    c = config.load_config()
-    with mock.patch('builtins.open',
-                    mock.mock_open(read_data=config_data)) as mock_open:
-        config.save_config(c)
-        mock_open.assert_called_once_with(config.CONFIG_FILE_NAME, 'w')
+    with mock.patch('builtins.open') as mock_open:
+        with mock.patch('os.path.exists', lambda x: True):
+            c = config.load_config()
+            config.save_config(c)
+            mock_open.assert_called_once_with(config.CONFIG_FILE_NAME, 'w')
