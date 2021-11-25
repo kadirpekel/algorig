@@ -194,21 +194,16 @@ Success! This built-in command essentially compiled your teal code, created an a
 ```json
 # protocol.json
 {
-  ...
   "algod_address": "http://localhost:4001",
   "algod_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  ...
 }
 ```
 
 Another side effect of this commmand is that whenever our application initially created on the blockchain, this command will save and keep the `id` of our application under our config file using the configuration key of `app_id`. At this point, if you dump the contents of our config file,  you'll notice the `app_id` setting which was absent previously.
 
 ```json
-# protocol.json
 {
-  ...
   "app_id": 1
-  ...
 }
 ```
 
@@ -376,15 +371,67 @@ class Application(BaseApplication):
 
 ### Custom configuration settings
 
-[TODO]
+You may end up adding your own settings to `protocol.json` configuration file and refer them accordingly while implementing your contract.
 
-### Algorig as a SDK builder
+For example, you may want to keep an address belonging to an actor of and operation. So simply add it to `protocol.json` file and refer it by while using the instance field `config` comes with the `BaseApplication` class instance. 
 
-[TODO]
+Let;s add one as an example.
 
-### Overriding `BaseApplication`
+```json
+{
+    "funder_address": "DNSNRCJ6WO4LCVNE6O6JHYSZQ7C725RVJMMTT4GCBOUH4VPMPMZYUVBFLU"
+}
+```
 
-[TODO]
+Now use it in your `Application` class where needed.
+
+```python
+# protocol.py
+
+from algorig.app import BaseApplication
+
+from algosdk.future import transaction
+
+
+class Application(BaseApplication):
+
+  ...
+
+  def op_application_fund(self, amt: int):
+    sp = self.algod.suggested_params()
+
+    fund_app_txn = transaction.PaymentTxn(
+        sp=sp,
+        sender=self.config['funder_address'],
+        receiver=self.config['app_address'],
+        amt=amt
+    )
+
+    self.submit(fund_app_txn)
+
+```
+
+Add settings as many as you want to keep them in the config file.
+
+### Overriding the default behaviours of `BaseApplication`
+
+You're always free to change the underlying functionality comes with `BaseApplication`. For instance, if you would like to modify the default behaviour of the clear state program, simply override the corresponding method as shown below.
+
+```python
+class Application(BaseApplication):
+
+    ...
+
+    def get_clear_state_program(self):
+        # default behaviour was simply returning Int(1)
+        return Txn.sender() ==\
+            'HPAMDTCS3B2BZUGP5JUNDNBKVWXYPKPC56VEYT3WYBEONPVD6HJLUHMTVQ'
+
+    ...
+
+```
+
+Please checkout `app.py` to review `BaseApplication` class for the base implementations
 
 ## Contribute
 
