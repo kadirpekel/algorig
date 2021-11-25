@@ -373,7 +373,7 @@ class Application(BaseApplication):
 
 You may end up adding your own settings to `protocol.json` configuration file and refer them accordingly while implementing your contract.
 
-For example, you may want to keep an address belonging to an actor of and operation. So simply add it to `protocol.json` file and refer it by while using the instance field `config` comes with the `BaseApplication` class instance. 
+For example, you may want to keep an address belonging to an actor of an operation. In such case, simply add it to `protocol.json` file and refer it by using the instance field `config` comes with the `BaseApplication` class instance. 
 
 Let;s add one as an example.
 
