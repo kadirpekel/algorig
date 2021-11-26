@@ -39,5 +39,5 @@ def init(algod_address=None,
 try:
     application = BaseApplication.load_from_cwd()
     application.generate_commands()
-except ImportError:
+except ImportError as e:
     pass

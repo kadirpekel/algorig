@@ -4,13 +4,13 @@ import base64
 import logging
 import importlib
 
-from pyteal import compileTeal, Mode, Int
+from pyteal import compileTeal, Mode, Approve
 
 from algosdk.v2client import algod
 from algosdk import kmd
 from algosdk.logic import get_application_address
-from algosdk.future.transaction import assign_group_id
-from algosdk.future.transaction import (ApplicationCreateTxn,
+from algosdk.future.transaction import (assign_group_id,
+                                        ApplicationCreateTxn,
                                         ApplicationUpdateTxn,
                                         OnComplete,
                                         StateSchema)
@@ -51,7 +51,7 @@ class BaseApplication:
 
     @classmethod
     def load_from_cwd(cls):
-        sys.path.append('.')
+        sys.path.insert(0, '.')
         protocol = importlib.import_module(APP_MODULE_NAME)
         Application = getattr(protocol, 'Application', None)
         assert Application, '`Application` class not found'
@@ -72,6 +72,33 @@ class BaseApplication:
         self.config = load_config()
         self.kmd = self.build_kmd()
         self.algod = self.build_algod()
+        self.suggested_params = self.algod.suggested_params()
+
+    def decode_state(self, state_array):
+        state = {}
+        for pair in state_array:
+            key = base64.b64decode(pair["key"])
+            value = pair["value"]
+            valueType = value["type"]
+            if valueType == 2:
+                # value is uint64
+                value = value.get("uint", 0)
+            elif valueType == 1:
+                # value is byte array
+                value = base64.b64decode(value.get("bytes", ""))
+            else:
+                raise Exception(f"Unexpected state type: {valueType}")
+            state[key] = value
+        return state
+
+    def fetch_app_info(self):
+        return self.algod.application_info(self.config['app_id'])
+
+    def decode_app_states(self):
+        app_info = self.fetch_app_info()
+        global_state = self.decode_state(app_info["params"]["global-state"])
+        local_state = self.decode_state(app_info["params"]["local-state"])
+        return global_state, local_state
 
     def wait_for_transaction(self, tx_id, timeout=None):
         timeout = timeout or self.DEFAULT_WAIT_TIMEOUT
@@ -153,7 +180,7 @@ class BaseApplication:
 
     def build_application_create_txn(self, app_args=None):
         return ApplicationCreateTxn(
-            sp=self.algod.suggested_params(),
+            sp=self.suggested_params,
             sender=self.config['signing_address'],
             on_complete=OnComplete.NoOpOC,
             approval_program=self.get_approval_program_bytecode(),
@@ -165,7 +192,7 @@ class BaseApplication:
 
     def build_application_update_txn(self, app_args=None):
         return ApplicationUpdateTxn(
-            sp=self.algod.suggested_params(),
+            sp=self.suggested_params,
             index=self.config['app_id'],
             sender=self.config['signing_address'],
             approval_program=self.get_approval_program_bytecode(),
@@ -214,4 +241,4 @@ class BaseApplication:
         raise NotImplementedError()
 
     def get_clear_state_program(self):
-        return Int(1)
+        return Approve()

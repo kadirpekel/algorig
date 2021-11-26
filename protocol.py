@@ -17,17 +17,16 @@ class Application(BaseApplication):
         )
       
     def op_application_setup(self, funder_address):
-        sp = self.algod.suggested_params()
 
         fund_app_txn = transaction.PaymentTxn(
-            sp=sp,
+            sp=self.suggested_params,
             sender=funder_address,
             receiver=self.config['app_address'],
             amt=1_000
         )
 
         setup_app_txn = transaction.ApplicationCallTxn(
-            sp=sp,
+            sp=self.suggested_params,
             on_complete=transaction.OnComplete.NoOpOC,
             sender=self.config['signing_address'],
             index=self.config['app_id'],

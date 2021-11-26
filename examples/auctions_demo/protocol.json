@@ -1,0 +1,14 @@
+{
+  "algod_address": "http://localhost:4001",
+  "algod_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "kmd_address": "http://localhost:4002",
+  "kmd_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "wallet_name": "unencrypted-default-wallet",
+  "wallet_password": "",
+  "signing_address": "DNSNRCJ6WO4LCVNE6O6JHYSZQ7C725RVJMMTT4GCBOUH4VPMPMZYUVBFLU",
+  "teal_version": 4,
+  "num_global_byte_slices": 7,
+  "num_global_ints": 2,
+  "num_local_byte_slices": 0,
+  "num_local_ints": 0
+}

@@ -259,24 +259,24 @@ class Application(BaseApplication):
 
   ...
 
-  def op_hello_world(self, my_param):
+  def op_send_greeting(self, greeting):
     self.submit(transaction.ApplicationCallTxn(
         sp=self.algod.suggested_params(),
         on_complete=transaction.OnComplete.NoOpOC,
         index=self.config.getint('app_id'),
         sender=self.config['signing_address'],
-        app_args=[bytes(my_param, 'ascii')],
+        app_args=[greeting)],
     ))
 ```
 
-That's simple as it. We just implemented a `hello_world` command to interact with our contract. Let's first locate it.
+That's simple as it. We just implemented a `send_greeting` command to interact with our contract. Let's first locate it.
 
 ```bash
 $ rig --help
-usage: rig [-h] [-v] {init,application_create,application_update,hello_world} ...
+usage: rig [-h] [-v] {init,application_create,application_update,send_greeting} ...
 
 positional arguments:
-  {init,application_create,application_update,hello_world}
+  {init,application_create,application_update,send_greeting}
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -287,20 +287,20 @@ optional arguments:
 Also you may check the further details about our new command by seeing the helper instructions of the command itself.
 
 ```bash
-$ rig hello_world --help
-usage: rig hello_world [-h] my_param
+$ rig send_greeting --help
+usage: rig send_greeting [-h] greeting
 
 positional arguments:
-  my_param
+  greeting
 
 optional arguments:
   -h, --help  show this help message and exit
 ```
 
-Since the `hello_world` command ready at your fingertips, just run it to see if it works as expected.
+Since the `send_greeting` command ready at your fingertips, just run it to see if it works as expected.
 
 ```bash
-$ rig hello_world "Hello World"
+$ rig send_greeting "Hello World"
 Processing transaction: LBF5NQOM2WWIZ4ZUPAVTPKXTK7MD5TODPW2JO65UGNSASQ4IZT2Q
 ........
 Confirmed at round: 6054
@@ -310,7 +310,7 @@ Perfect! You just interacted with your contract deployed on the blockchain. Now 
 
 
 ```bash
-$ rig hello_world "No Way"
+$ rig send_greeting "Boooo"
 algosdk.error.AlgodHTTPError: TransactionPool.Remember: transaction 4GFYWBASWI7T5GERJKO5R4GUUXUDH4LQGCO55BVUKJNXNCQQAKJA: transaction rejected by ApprovalProgram
 ```
 
