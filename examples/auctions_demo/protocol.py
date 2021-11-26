@@ -84,7 +84,7 @@ class Application(BaseApplication):
         )
 
         setup_txn = transaction.ApplicationCallTxn(
-            sender=funder.getAddress(),
+            sender=funder,
             index=self.config['app_id'],
             on_complete=transaction.OnComplete.NoOpOC,
             app_args=[b"setup"],
@@ -167,7 +167,7 @@ class Application(BaseApplication):
             accounts.append(encoding.encode_address(bid_account))
 
         delete_txn = transaction.ApplicationDeleteTxn(
-            sender=closer.getAddress(),
+            sender=closer,
             index=self.config['app_id'],
             accounts=accounts,
             foreign_assets=[nft_id],
