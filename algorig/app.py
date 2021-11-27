@@ -3,6 +3,7 @@ import time
 import base64
 import logging
 import importlib
+import json
 
 from pyteal import compileTeal, Mode, Approve
 
@@ -77,7 +78,7 @@ class BaseApplication:
     def decode_state(self, state_array):
         state = {}
         for pair in state_array:
-            key = base64.b64decode(pair["key"])
+            key = base64.b64decode(pair["key"]).decode()
             value = pair["value"]
             valueType = value["type"]
             if valueType == 2:
@@ -85,7 +86,7 @@ class BaseApplication:
                 value = value.get("uint", 0)
             elif valueType == 1:
                 # value is byte array
-                value = base64.b64decode(value.get("bytes", ""))
+                value = base64.b64decode(value.get("bytes", "")).decode()
             else:
                 raise Exception(f"Unexpected state type: {valueType}")
             state[key] = value
@@ -94,11 +95,23 @@ class BaseApplication:
     def fetch_app_info(self):
         return self.algod.application_info(self.config['app_id'])
 
-    def decode_app_states(self):
+    def op_application_state(self, scope):
+        '''Dump application state in json format'
+        Args:
+            scope (enum): Should be either `global` or `local`
+        '''
+        state = self.decode_app_states(scope)
+        self.dump_state(state)
+
+    def dump_state(self, state):
+        print(json.dumps(state, indent=2))
+
+    def decode_app_states(self, scope):
+        assert scope in ['global', 'local'], \
+            'scope should be either `global` or `local`'
         app_info = self.fetch_app_info()
-        global_state = self.decode_state(app_info["params"]["global-state"])
-        local_state = self.decode_state(app_info["params"]["local-state"])
-        return global_state, local_state
+        state = app_info["params"].get(f'{scope}-state', {})
+        return self.decode_state(state)
 
     def wait_for_transaction(self, tx_id, timeout=None):
         timeout = timeout or self.DEFAULT_WAIT_TIMEOUT

@@ -38,7 +38,7 @@ class Application(BaseApplication):
             The ID of the newly created auction app.
         '''
         return super().op_application_create(app_args=[
-            encoding.decode_address(seller),
+            seller,
             nft_id.to_bytes(8, "big"),
             start_time.to_bytes(8, "big"),
             end_time.to_bytes(8, "big"),

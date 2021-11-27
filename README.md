@@ -308,7 +308,6 @@ Confirmed at round: 6054
 
 Perfect! You just interacted with your contract deployed on the blockchain. Now let's see what happens when we send a different parameter to our contract.
 
-
 ```bash
 $ rig send_greeting "Boooo"
 algosdk.error.AlgodHTTPError: TransactionPool.Remember: transaction 4GFYWBASWI7T5GERJKO5R4GUUXUDH4LQGCO55BVUKJNXNCQQAKJA: transaction rejected by ApprovalProgram
