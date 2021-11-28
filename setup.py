@@ -10,7 +10,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     py_modules=['algorig'],
-    version='0.1.1',
+    version='0.1.2',
     python_requires='>3.5.4',
     description='algorand development rig',
     author='Kadir Pekel',
