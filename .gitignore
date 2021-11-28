@@ -28,5 +28,5 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-./protocol.json
-./protocol.py
+protocol.json
+protocol.py

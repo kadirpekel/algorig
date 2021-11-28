@@ -11,8 +11,7 @@ from algosdk.v2client import algod
 from algosdk import kmd
 from algosdk.logic import get_application_address
 from algosdk.future.transaction import (assign_group_id,
-                                        ApplicationCreateTxn,
-                                        ApplicationUpdateTxn,
+                                        ApplicationCallTxn,
                                         OnComplete,
                                         StateSchema)
 
@@ -95,7 +94,7 @@ class BaseApplication:
     def fetch_app_info(self):
         return self.algod.application_info(self.config['app_id'])
 
-    def op_application_state(self, scope):
+    def op_dump_state(self, scope):
         '''Dump application state in json format'
         Args:
             scope (enum): Should be either `global` or `local`
@@ -191,34 +190,40 @@ class BaseApplication:
             num_uints=self.config['num_local_ints'],
             num_byte_slices=self.config['num_local_byte_slices'])
 
-    def build_application_create_txn(self, app_args=None):
-        return ApplicationCreateTxn(
-            sp=self.suggested_params,
-            sender=self.config['signing_address'],
-            on_complete=OnComplete.NoOpOC,
+    def build_app_call_txn(self, **kwargs):
+
+        is_application_create = kwargs.pop('is_application_create', False)
+        app_id = self.config.get('app_id', 0)
+
+        if is_application_create:
+            assert app_id == 0, 'Application already created.'
+        else:
+            assert app_id > 0, 'Application not created yet.'
+
+        def to_ints(self, *args):
+            return [int(arg) for arg in args]
+
+        kwargs.setdefault('sender', self.config['signing_address'])
+        kwargs.setdefault('sp', self.suggested_params)
+        kwargs.setdefault('on_complete', OnComplete.NoOpOC)
+        kwargs.setdefault('index', app_id)
+        kwargs.setdefault('accounts',
+                          to_ints(self.config.get('accounts', [])))
+        kwargs.setdefault('foreign_apps',
+                          to_ints(self.config.get('foreign_apps', [])))
+        kwargs.setdefault('foreign_assets',
+                          to_ints(self.config.get('foreign_assets', [])))
+        return ApplicationCallTxn(**kwargs)
+
+    def op_create(self, app_args: list = []):
+        response = self.submit(self.build_app_call_txn(
             approval_program=self.get_approval_program_bytecode(),
             clear_program=self.get_clear_state_program_bytecode(),
             global_schema=self.get_global_schema(),
             local_schema=self.get_local_schema(),
             app_args=app_args or [],
-        )
-
-    def build_application_update_txn(self, app_args=None):
-        return ApplicationUpdateTxn(
-            sp=self.suggested_params,
-            index=self.config['app_id'],
-            sender=self.config['signing_address'],
-            approval_program=self.get_approval_program_bytecode(),
-            clear_program=self.get_clear_state_program_bytecode(),
-            app_args=app_args or [],
-        )
-
-    def op_application_create(self, app_args: list = []):
-        app_id = self.config.get('app_id', None)
-        assert not app_id, 'Application already created.'
-
-        txn = self.build_application_create_txn(app_args=app_args)
-        response = self.submit(txn)
+            is_application_create=True
+        ))
         app_id = response['application-index']
         app_address = get_application_address(app_id)
         self.config.update({
@@ -229,10 +234,50 @@ class BaseApplication:
         print(f'Application created with id: {app_id}.')
         return response
 
-    def op_application_update(self, app_args: list = []):
-        txn = self.build_application_update_txn(app_args=app_args)
-        response = self.submit(txn)
+    def op_update(self, app_args: list = []):
+        response = self.submit(self.build_app_call_txn(
+            on_complete=OnComplete.UpdateApplicationOC,
+            approval_program=self.get_approval_program_bytecode(),
+            clear_program=self.get_clear_state_program_bytecode(),
+            global_schema=self.get_global_schema(),
+            local_schema=self.get_local_schema(),
+            app_args=app_args or []
+        ))
         print('Application updated successfully.')
+        return response
+
+    def op_delete(self):
+        response = self.submit(self.build_app_call_txn(
+            on_complete=OnComplete.DeleteApplicationOC,
+        ))
+        del self.config['app_id']
+        del self.config['app_address']
+        save_config(self.config)
+        print('Application deleted successfully.')
+        return response
+
+    def op_clearstate(self, sender):
+        response = self.submit(self.build_app_call_txn(
+            on_complete=OnComplete.ClearStateOC,
+            sender=sender
+        ))
+        print('Application cleared state successfully.')
+        return response
+
+    def op_closeout(self, sender):
+        response = self.submit(self.build_app_call_txn(
+            on_complete=OnComplete.CloseOutOC,
+            sender=sender
+        ))
+        print('Application closed out successfully.')
+        return response
+
+    def op_optin(self, sender):
+        response = self.submit(self.build_app_call_txn(
+            on_complete=OnComplete.OptInOC,
+            sender=sender
+        ))
+        print('Application opted in successfully.')
         return response
 
     def submit_group(self, transactions):
