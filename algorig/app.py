@@ -94,23 +94,11 @@ class BaseApplication:
     def fetch_app_info(self):
         return self.algod.application_info(self.config['app_id'])
 
-    def op_dump_state(self, scope):
-        '''Dump application state in json format'
-        Args:
-            scope (enum): Should be either `global` or `local`
-        '''
-        state = self.decode_app_states(scope)
-        self.dump_state(state)
-
-    def dump_state(self, state):
-        print(json.dumps(state, indent=2))
-
-    def decode_app_states(self, scope):
-        assert scope in ['global', 'local'], \
-            'scope should be either `global` or `local`'
+    def op_dump_state(self):
         app_info = self.fetch_app_info()
-        state = app_info["params"].get(f'{scope}-state', {})
+        state = app_info["params"].get('global-state', {})
         return self.decode_state(state)
+        print(json.dumps(state, indent=2))
 
     def wait_for_transaction(self, tx_id, timeout=None):
         timeout = timeout or self.DEFAULT_WAIT_TIMEOUT
