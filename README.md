@@ -127,10 +127,10 @@ To see all the available commands, simple type `rig` or `rig --help`
 
 ```bash
 $ rig --help
-sage: rig [-h] [-v] {init,application_create,application_update,example_command} ...
+sage: rig [-h] [-v] {init,create,update,example_command} ...
 
 positional arguments:
-  {init,application_create,application_update,example_command}
+  {init,create,update,example_command}
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -164,13 +164,13 @@ def get_approval_program(self):
     )
 ```
 
-Congrats, you just implemented your first Algorand smart contract. At this point, since you'll need to deploy your contract to Algorand blockchain, Algorig here will help us to deploy it with a built-in command `application_create` by performing some magic behind in order to save us writing so many boilerplate code to achive the same.
+Congrats, you just implemented your first Algorand smart contract. At this point, since you'll need to deploy your contract to Algorand blockchain, Algorig here will help us to deploy it with a built-in command `create` by performing some magic behind in order to save us writing so many boilerplate code to achive the same.
 
 First of all, let's find out how the command works before acutally running it.
 
 ```bash
-$ rig application_create --help
-usage: rig application_create [-h] [--app_args APP_ARGS]
+$ rig create --help
+usage: rig create [-h] [--app_args APP_ARGS]
 
 optional arguments:
   -h, --help           show this help message and exit
@@ -207,7 +207,7 @@ Another side effect of this commmand is that whenever our application initially 
 }
 ```
 
-This setting will basically help Algorig to locate your application whenever you want to interact with it. For example, there is also another built-in command called `application_update` which uses this setting while locating your application created previously.
+This setting will basically help Algorig to locate your application whenever you want to interact with it. For example, there is also another built-in command called `update` which uses this setting while locating your application created previously.
 
 So now, it's a good time to also see how to deploy any changes in the contract.
 
@@ -232,7 +232,7 @@ def get_approval_program(self):
 Now you should be able to send your updates and override your existing contract using the command below:
 
 ```bash
-$ python application_update
+$ python update
 Processing transaction: H3ZBGVX4SVPAPHPZT23Q3LHIMTOQBEY2H6SDHGARCABLWRB7JNLA
 ......
 Confirmed at round: 5493
@@ -273,10 +273,10 @@ That's simple as it. We just implemented a `send_greeting` command to interact w
 
 ```bash
 $ rig --help
-usage: rig [-h] [-v] {init,application_create,application_update,send_greeting} ...
+usage: rig [-h] [-v] {init,create,update,send_greeting} ...
 
 positional arguments:
-  {init,application_create,application_update,send_greeting}
+  {init,create,update,send_greeting}
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -396,7 +396,7 @@ class Application(BaseApplication):
 
   ...
 
-  def op_application_fund(self, amt: int):
+  def op_fund(self, amt: int):
     sp = self.algod.suggested_params()
 
     fund_app_txn = transaction.PaymentTxn(
