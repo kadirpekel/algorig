@@ -97,8 +97,8 @@ class BaseApplication:
     def op_dump_state(self):
         app_info = self.fetch_app_info()
         state = app_info["params"].get('global-state', {})
-        return self.decode_state(state)
-        print(json.dumps(state, indent=2))
+        decoed_state = self.decode_state(state)
+        print(json.dumps(decoed_state, indent=2))
 
     def wait_for_transaction(self, tx_id, timeout=None):
         timeout = timeout or self.DEFAULT_WAIT_TIMEOUT
