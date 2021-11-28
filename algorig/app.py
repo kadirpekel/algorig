@@ -239,8 +239,6 @@ class BaseApplication:
             on_complete=OnComplete.UpdateApplicationOC,
             approval_program=self.get_approval_program_bytecode(),
             clear_program=self.get_clear_state_program_bytecode(),
-            global_schema=self.get_global_schema(),
-            local_schema=self.get_local_schema(),
             app_args=app_args or []
         ))
         print('Application updated successfully.')
