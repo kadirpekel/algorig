@@ -100,6 +100,17 @@ class BaseApplication:
         decoed_state = self.decode_state(state)
         print(json.dumps(decoed_state, indent=2))
 
+    def op_dump_local_state(self, sender):
+        account_info = self.algod.account_info(sender)
+        assert account_info, 'Account not found'
+        apps = account_info.get('apps-local-state', [])
+        for app in apps:
+            if app['id'] == self.config.get('app_id'):
+                state = app['key-value']
+                decoded_state = self.decode_state(state)
+                print(json.dumps(decoded_state, indent=2))
+                return
+
     def wait_for_transaction(self, tx_id, timeout=None):
         timeout = timeout or self.DEFAULT_WAIT_TIMEOUT
         start = last_check = time.time()
