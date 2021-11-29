@@ -74,42 +74,27 @@ class BaseApplication:
         self.algod = self.build_algod()
         self.suggested_params = self.algod.suggested_params()
 
-    def decode_state(self, state_array):
-        state = {}
-        for pair in state_array:
-            key = base64.b64decode(pair["key"]).decode()
-            value = pair["value"]
-            valueType = value["type"]
-            if valueType == 2:
-                # value is uint64
-                value = value.get("uint", 0)
-            elif valueType == 1:
-                # value is byte array
-                value = base64.b64decode(value.get("bytes", "")).decode()
+    def decode_state(self, state):
+        formatted = {}
+        for item in state:
+            key = item['key']
+            value = item['value']
+            formatted_key = base64.b64decode(key).decode('utf-8')
+            if value['type'] == 1:
+                # byte string
+                if formatted_key == 'voted':
+                    formatted_value = \
+                        base64.b64decode(value['bytes']).decode('utf-8')
+                else:
+                    formatted_value = value['bytes']
+                formatted[formatted_key] = formatted_value
             else:
-                raise Exception(f"Unexpected state type: {valueType}")
-            state[key] = value
-        return state
+                # integer
+                formatted[formatted_key] = value['uint']
+        return formatted
 
     def fetch_app_info(self):
         return self.algod.application_info(self.config['app_id'])
-
-    def op_dump_state(self):
-        app_info = self.fetch_app_info()
-        state = app_info["params"].get('global-state', {})
-        decoed_state = self.decode_state(state)
-        print(json.dumps(decoed_state, indent=2))
-
-    def op_dump_local_state(self, sender):
-        account_info = self.algod.account_info(sender)
-        assert account_info, 'Account not found'
-        apps = account_info.get('apps-local-state', [])
-        for app in apps:
-            if app['id'] == self.config.get('app_id'):
-                state = app['key-value']
-                decoded_state = self.decode_state(state)
-                print(json.dumps(decoded_state, indent=2))
-                return
 
     def wait_for_transaction(self, tx_id, timeout=None):
         timeout = timeout or self.DEFAULT_WAIT_TIMEOUT
@@ -276,6 +261,29 @@ class BaseApplication:
         ))
         print('Application opted in successfully.')
         return response
+
+    def op_dump_teal(self, clear_state=False):
+        if clear_state:
+            print(self.get_clear_state_program())
+        else:
+            print(self.get_approval_program_as_teal())        
+
+    def op_global_state(self):
+        app_info = self.fetch_app_info()
+        state = app_info["params"].get('global-state', {})
+        decoed_state = self.decode_state(state)
+        print(json.dumps(decoed_state, indent=2))
+
+    def op_local_state(self, sender):
+        account_info = self.algod.account_info(sender)
+        assert account_info, 'Account not found'
+        apps = account_info.get('apps-local-state', [])
+        for app in apps:
+            if app['id'] == self.config.get('app_id'):
+                state = app['key-value']
+                decoded_state = self.decode_state(state)
+                print(json.dumps(decoded_state, indent=2))
+                return
 
     def submit_group(self, transactions):
         assign_group_id(transactions)
