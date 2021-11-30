@@ -268,22 +268,26 @@ class BaseApplication:
         else:
             print(self.get_approval_program_as_teal())        
 
-    def op_global_state(self):
+    def read_global_state(self):
         app_info = self.fetch_app_info()
         state = app_info["params"].get('global-state', {})
-        decoed_state = self.decode_state(state)
-        print(json.dumps(decoed_state, indent=2))
+        return self.decode_state(state)
 
-    def op_local_state(self, sender):
-        account_info = self.algod.account_info(sender)
+    def read_local_state(self, address):
+        account_info = self.algod.account_info(address)
         assert account_info, 'Account not found'
         apps = account_info.get('apps-local-state', [])
         for app in apps:
             if app['id'] == self.config.get('app_id'):
                 state = app['key-value']
-                decoded_state = self.decode_state(state)
-                print(json.dumps(decoded_state, indent=2))
-                return
+                return self.decode_state(state)
+        return {}
+
+    def op_global_state(self):
+        print(json.dumps(self.read_global_state(), indent=2))
+
+    def op_local_state(self, address):
+        print(json.dumps(self.read_local_state(address), indent=2))
 
     def submit_group(self, transactions):
         assign_group_id(transactions)
