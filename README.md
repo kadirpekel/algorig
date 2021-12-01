@@ -182,7 +182,7 @@ It seems to be legit using the command directly without any given parameteres in
 Let's run the command.
 
 ```bash
-$ rig create_application
+$ rig create
 Processing transaction: A35EASTS6ANOO5HTAFIWZAAPSWJJ653ZFM74APMHE46ZIKXDNQDQ
 ........
 Confirmed at round: 2342525
