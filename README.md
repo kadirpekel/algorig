@@ -232,7 +232,7 @@ def get_approval_program(self):
 Now you should be able to send your updates and override your existing contract using the command below:
 
 ```bash
-$ python update
+$ rig update
 Processing transaction: H3ZBGVX4SVPAPHPZT23Q3LHIMTOQBEY2H6SDHGARCABLWRB7JNLA
 ......
 Confirmed at round: 5493
