@@ -1,5 +1,4 @@
 import sys
-import time
 import base64
 import logging
 import importlib
@@ -96,23 +95,18 @@ class BaseApplication:
     def fetch_app_info(self):
         return self.algod.application_info(self.config['app_id'])
 
-    def wait_for_transaction(self, tx_id, timeout=None):
-        timeout = timeout or self.DEFAULT_WAIT_TIMEOUT
-        start = last_check = time.time()
+    def wait_for_transaction(self, tx_id):
+        last_round = self.algod.status().get('last-round')
+        txinfo = self.algod.pending_transaction_info(tx_id)
         print(f'Processing transaction: {tx_id}')
-        while last_check - start < timeout:
-            pending_txn = self.algod.pending_transaction_info(tx_id)
-            logger.debug(pending_txn)
+        while not (txinfo.get('confirmed-round') and
+                   txinfo.get('confirmed-round') > 0):
             print('.', end='', flush=True)
-            round = pending_txn.get("confirmed-round", 0)
-            if round > 0:
-                print()
-                print(f'Confirmed at round: {round}')
-                return pending_txn
-            elif pending_txn["pool-error"]:
-                raise Exception(pending_txn["pool-error"])
-            time.sleep(1)
-        raise Exception('Pending tx not found in timeout rounds')
+            last_round += 1
+            self.algod.status_after_block(last_round)
+            txinfo = self.algod.pending_transaction_info(tx_id)
+        print('Confirmed at round: {}'.format(txinfo.get('confirmed-round')))
+        return txinfo
 
     def compile_program(self, program):
         return compileTeal(program,
@@ -121,7 +115,7 @@ class BaseApplication:
 
     def compile_teal(self, teal):
         meta = self.algod.compile(teal)
-        return base64.b64decode(meta['result'])
+        return meta['result']
 
     def get_wallet_token(self):
         entries = self.kmd.list_wallets()
@@ -143,6 +137,18 @@ class BaseApplication:
                                                txn)
         self.kmd.release_wallet_handle(wallet_handle)
         return signed_txn
+
+    def sign_bytecode(self, bytecode, address=None):
+        wallet_password = self.config['wallet_password']
+        wallet_token = self.get_wallet_token()
+        wallet_handle = self.kmd.init_wallet_handle(wallet_token,
+                                                    wallet_password)
+        return self.kmd.kmd_request('POST', '/program/sign', data={
+            'data': bytecode,
+            'address': address or self.config['signing_address'],
+            'wallet_handle_token': wallet_handle,
+            'wallet_password': wallet_password,
+        })
 
     def build_algod(self):
         return algod.AlgodClient(self.config['algod_token'],
@@ -266,7 +272,7 @@ class BaseApplication:
         if clear_state:
             print(self.get_clear_state_program())
         else:
-            print(self.get_approval_program_as_teal())        
+            print(self.get_approval_program_as_teal())
 
     def read_global_state(self):
         app_info = self.fetch_app_info()
