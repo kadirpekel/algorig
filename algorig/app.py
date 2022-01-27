@@ -3,6 +3,7 @@ import base64
 import logging
 import importlib
 import json
+from collections import OrderedDict
 
 from pyteal import compileTeal, Mode, Approve
 
@@ -12,7 +13,9 @@ from algosdk.logic import get_application_address
 from algosdk.future.transaction import (assign_group_id,
                                         ApplicationCallTxn,
                                         OnComplete,
-                                        StateSchema)
+                                        StateSchema,
+                                        LogicSigTransaction,
+                                        LogicSig)
 
 
 from algorig.config import load_config, save_config
@@ -47,6 +50,7 @@ def init_application_stub():
 class BaseApplication:
 
     DEFAULT_WAIT_TIMEOUT = 10
+    ZERO_ADDRESS = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ'
 
     @classmethod
     def load_from_cwd(cls):
@@ -98,10 +102,9 @@ class BaseApplication:
     def wait_for_transaction(self, tx_id):
         last_round = self.algod.status().get('last-round')
         txinfo = self.algod.pending_transaction_info(tx_id)
-        print(f'Processing transaction: {tx_id}')
+        print(f'Processing transaction: {tx_id}, please wait...')
         while not (txinfo.get('confirmed-round') and
                    txinfo.get('confirmed-round') > 0):
-            print('.', end='', flush=True)
             last_round += 1
             self.algod.status_after_block(last_round)
             txinfo = self.algod.pending_transaction_info(tx_id)
@@ -127,7 +130,9 @@ class BaseApplication:
 
         raise ValueError(f'Wallet `{wallet_name}` not found on KMD')
 
-    def sign_transaction(self, txn):
+    def sign_transaction(self, txn, logicsig=None):
+        if logicsig:
+            return LogicSigTransaction(txn, logicsig)
         wallet_password = self.config['wallet_password']
         wallet_token = self.get_wallet_token()
         wallet_handle = self.kmd.init_wallet_handle(wallet_token,
@@ -138,17 +143,21 @@ class BaseApplication:
         self.kmd.release_wallet_handle(wallet_handle)
         return signed_txn
 
-    def sign_bytecode(self, bytecode, address=None):
+    def sign_bytecode(self, bytecode, address=None, arg=None):
         wallet_password = self.config['wallet_password']
         wallet_token = self.get_wallet_token()
         wallet_handle = self.kmd.init_wallet_handle(wallet_token,
                                                     wallet_password)
-        return self.kmd.kmd_request('POST', '/program/sign', data={
+        result = self.kmd.kmd_request('POST', '/program/sign', data={
             'data': bytecode,
             'address': address or self.config['signing_address'],
             'wallet_handle_token': wallet_handle,
             'wallet_password': wallet_password,
         })
+
+        logicsig = LogicSig(base64.b64decode(bytecode), arg)
+        logicsig.sig = result['sig']
+        return logicsig
 
     def build_algod(self):
         return algod.AlgodClient(self.config['algod_token'],
@@ -165,10 +174,12 @@ class BaseApplication:
         return self.compile_program(self.get_clear_state_program())
 
     def get_approval_program_bytecode(self):
-        return self.compile_teal(self.get_approval_program_as_teal())
+        return base64.b64decode(
+            self.compile_teal(self.get_approval_program_as_teal()))
 
     def get_clear_state_program_bytecode(self):
-        return self.compile_teal(self.get_clear_state_program_as_teal())
+        return base64.b64decode(
+            self.compile_teal(self.get_clear_state_program_as_teal()))
 
     def get_global_schema(self):
         return StateSchema(
@@ -295,18 +306,18 @@ class BaseApplication:
     def op_local_state(self, address):
         print(json.dumps(self.read_local_state(address), indent=2))
 
-    def submit_group(self, transactions):
+    def submit_group(self, transactions, logicsig=None):
         assign_group_id(transactions)
         signed_transactions = []
         for txn in transactions:
-            signed_txn = self.sign_transaction(txn)
+            signed_txn = self.sign_transaction(txn, logicsig=logicsig)
             signed_transactions.append(signed_txn)
 
         tx_id = self.algod.send_transactions(signed_transactions)
         return self.wait_for_transaction(tx_id)
 
-    def submit(self, txn):
-        signed_txn = self.sign_transaction(txn)
+    def submit(self, txn, logicsig=None):
+        signed_txn = self.sign_transaction(txn, logicsig=logicsig)
         tx_id = self.algod.send_transaction(signed_txn)
         return self.wait_for_transaction(tx_id)
 
