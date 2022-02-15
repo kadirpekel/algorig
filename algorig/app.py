@@ -11,6 +11,7 @@ from algosdk.v2client import algod
 from algosdk import kmd
 from algosdk.logic import get_application_address
 from algosdk.future.transaction import (assign_group_id,
+                                        Transaction,
                                         ApplicationCallTxn,
                                         OnComplete,
                                         StateSchema,
@@ -131,8 +132,16 @@ class BaseApplication:
         raise ValueError(f'Wallet `{wallet_name}` not found on KMD')
 
     def sign_transaction(self, txn, logicsig=None):
+
+        if not isinstance(txn, Transaction):
+            return txn
+
+        if isinstance(txn, LogicSigTransaction):
+            return txn
+
         if logicsig:
             return LogicSigTransaction(txn, logicsig)
+
         wallet_password = self.config['wallet_password']
         wallet_token = self.get_wallet_token()
         wallet_handle = self.kmd.init_wallet_handle(wallet_token,
