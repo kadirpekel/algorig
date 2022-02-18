@@ -112,9 +112,10 @@ class BaseApplication:
         print('Confirmed at round: {}'.format(txinfo.get('confirmed-round')))
         return txinfo
 
-    def compile_program(self, program):
+    def compile_program(self, program, is_logicsig=False):
+        mode = Mode.Signature if is_logicsig else Mode.Application
         return compileTeal(program,
-                           mode=Mode.Application,
+                           mode=mode,
                            version=self.config['teal_version'])
 
     def compile_teal(self, teal):
@@ -136,10 +137,7 @@ class BaseApplication:
         if not isinstance(txn, Transaction):
             return txn
 
-        if isinstance(txn, LogicSigTransaction):
-            return txn
-
-        if logicsig:
+        if logicsig and logicsig.address() == txn.sender:
             return LogicSigTransaction(txn, logicsig)
 
         wallet_password = self.config['wallet_password']
@@ -163,7 +161,6 @@ class BaseApplication:
             'wallet_handle_token': wallet_handle,
             'wallet_password': wallet_password,
         })
-
         logicsig = LogicSig(base64.b64decode(bytecode), arg)
         logicsig.sig = result['sig']
         return logicsig
