@@ -132,13 +132,14 @@ class BaseApplication:
 
         raise ValueError(f'Wallet `{wallet_name}` not found on KMD')
 
-    def sign_transaction(self, txn, logicsig=None):
+    def sign_transaction(self, txn):
+
 
         if not isinstance(txn, Transaction):
             return txn
 
-        if logicsig and logicsig.address() == txn.sender:
-            return LogicSigTransaction(txn, logicsig)
+        if isinstance(txn, LogicSigTransaction):
+            return txn
 
         wallet_password = self.config['wallet_password']
         wallet_token = self.get_wallet_token()
@@ -312,18 +313,18 @@ class BaseApplication:
     def op_local_state(self, address):
         print(json.dumps(self.read_local_state(address), indent=2))
 
-    def submit_group(self, transactions, logicsig=None):
+    def submit_group(self, transactions):
         assign_group_id(transactions)
         signed_transactions = []
         for txn in transactions:
-            signed_txn = self.sign_transaction(txn, logicsig=logicsig)
+            signed_txn = self.sign_transaction(txn)
             signed_transactions.append(signed_txn)
 
         tx_id = self.algod.send_transactions(signed_transactions)
         return self.wait_for_transaction(tx_id)
 
-    def submit(self, txn, logicsig=None):
-        signed_txn = self.sign_transaction(txn, logicsig=logicsig)
+    def submit(self, txn):
+        signed_txn = self.sign_transaction(txn)
         tx_id = self.algod.send_transaction(signed_txn)
         return self.wait_for_transaction(tx_id)
 
