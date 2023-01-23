@@ -1,15 +1,16 @@
 # flake8: noqa
 from pyteal import *
 
-from algosdk.future import transaction
+from algosdk import transaction
 from algorig.app import BaseApplication
 
 
 class Application(BaseApplication):
 
     def get_approval_program(self):
+        
         def on_call():
-            return Txn.application_args[0] == Bytes('Hello World')
+            return Return(Txn.application_args[0] == Bytes('Hello World'))
 
         return Cond(
             [Txn.application_id() == Int(0), Approve()],

@@ -3,20 +3,19 @@ import base64
 import logging
 import importlib
 import json
-from collections import OrderedDict
 
 from pyteal import compileTeal, Mode, Approve
 
 from algosdk.v2client import algod
 from algosdk import kmd
 from algosdk.logic import get_application_address
-from algosdk.future.transaction import (assign_group_id,
-                                        Transaction,
-                                        ApplicationCallTxn,
-                                        OnComplete,
-                                        StateSchema,
-                                        LogicSigTransaction,
-                                        LogicSig)
+from algosdk.transaction import (assign_group_id,
+                                 Transaction,
+                                 ApplicationCallTxn,
+                                 OnComplete,
+                                 StateSchema,
+                                 LogicSigTransaction,
+                                 LogicSig)
 
 
 from algorig.config import load_config, save_config

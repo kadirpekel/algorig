@@ -14,7 +14,7 @@ DEFAULT_CONFIG = {
     'wallet_name': 'unencrypted-default-wallet',
     'wallet_password': '',
     'signing_address': 'a' * 58,
-    'teal_version': 4,
+    'teal_version': 8,
     'num_global_byte_slices': 0,
     'num_global_ints': 0,
     'num_local_byte_slices': 0,
